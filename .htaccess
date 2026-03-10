@@ -1,0 +1,35 @@
+Options -Indexes
+Options +FollowSymLinks
+
+# Prevent direct access to config and includes
+<FilesMatch "^(database|payment)\.php$">
+    Order deny,allow
+    Deny from all
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /sunbis/
+
+    # Block access to sensitive directories
+    RewriteRule ^config/    - [F,L]
+    RewriteRule ^includes/  - [F,L]
+
+    # PHP file handling - allow normal
+</IfModule>
+
+# Security headers
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Cache static assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg  "access plus 1 month"
+    ExpiresByType image/png  "access plus 1 month"
+    ExpiresByType text/css   "access plus 1 week"
+    ExpiresByType text/javascript "access plus 1 week"
+</IfModule>
