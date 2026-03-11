@@ -2,11 +2,11 @@
 // ============================================================
 //  config/database.php  –  PostgreSQL connection
 // ============================================================
-define('DB_HOST',     getenv('DB_HOST')     ?: 'localhost');
-define('DB_PORT',     getenv('DB_PORT')     ?: '5432');
-define('DB_NAME',     getenv('DB_NAME')     ?: 'sunbis_agrofish');
-define('DB_USER',     getenv('DB_USER')     ?: 'postgres');
-define('DB_PASSWORD', getenv('DB_PASSWORD') ?: '');
+define('DB_HOST', 'ep-square-darkness-adnakq1q-pooler.c-2.us-east-1.aws.neon.tech');
+define('DB_PORT', '5432');
+define('DB_NAME', 'neondb');
+define('DB_USER', 'neondb_owner');
+define('DB_PASSWORD', 'npg_6ZvAOxSK7UGr');
 
 // App settings
 define('APP_NAME',    'Sunbis AgroFish');
@@ -24,8 +24,8 @@ function getDB(): PDO
 {
     static $pdo = null;
     if ($pdo === null) {
-        $dsn = sprintf(
-            'pgsql:host=%s;port=%s;dbname=%s',
+       $dsn = sprintf(
+            'pgsql:host=%s;port=%s;dbname=%s;sslmode=require',
             DB_HOST,
             DB_PORT,
             DB_NAME
