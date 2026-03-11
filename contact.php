@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       [
         ['bi-geo-alt-fill', 'Our Farm',    'Plot No. K-5,HIG-444,Kalinga Vihar,Bhubaneswar,Odisha,751019'],
         ['bi-telephone-fill', 'Phone / WhatsApp', '+91 9337227262'],
-        ['bi-envelope-fill', 'Email',      'sunbisagri@gmail.com'],
+        ['bi-envelope-fill', 'Email',      'sunbisagri33@gmail.com'],
         ['bi-clock-fill', 'Working Hours', 'Mon–Sat, 07:00 A.M – 17:00 P.M'],
       ] as $c
     ): ?>
