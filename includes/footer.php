@@ -36,7 +36,7 @@
         <ul class="footer-links">
           <li><i class="bi bi-geo-alt me-2"></i>Plot No. K-5,HIG-444,Kalinga Vihar,Bhubaneswar,Khurda,Odisha,751019</li>
           <li><i class="bi bi-telephone me-2"></i>+91 9337227262</li>
-          <li><i class="bi bi-envelope me-2"></i>sunbisagri@gmail.com</li>
+          <li><i class="bi bi-envelope me-2"></i>sunbisagri33@gmail.com</li>
           <li><i class="bi bi-clock me-2"></i>Mon–Sat, 07:00 A.M –17:00 P.M</li>
         </ul>
       </div>
