@@ -37,7 +37,7 @@ $related = $related->fetchAll();
   <div class="row g-5">
     <!-- IMAGE -->
     <div class="col-lg-5">
-      <?php if ($p['image'] && file_exists(UPLOAD_DIR . $p['image'])): ?>
+      <?php if (!empty($p['image'])): ?>
         <img src="<?= UPLOAD_URL . htmlspecialchars($p['image']) ?>" class="product-detail-img w-100" alt="<?= htmlspecialchars($p['product_name']) ?>" />
       <?php else: ?>
         <div class="product-detail-placeholder">🐟</div>
@@ -103,7 +103,11 @@ $related = $related->fetchAll();
           <div class="col-6 col-md-3">
             <div class="product-card">
               <a href="product.php?id=<?= $r['id'] ?>">
-                <div class="product-img-placeholder">🐟</div>
+                <?php if (!empty($r['image'])): ?>
+                  <img src="<?= UPLOAD_URL . htmlspecialchars($r['image']) ?>" class="w-100">
+                <?php else: ?>
+                  <div class="product-img-placeholder">🐟</div>
+                <?php endif; ?>
               </a>
               <div class="card-body">
                 <h6 class="card-title small"><a href="product.php?id=<?= $r['id'] ?>" class="text-decoration-none text-dark"><?= htmlspecialchars($r['product_name']) ?></a></h6>
