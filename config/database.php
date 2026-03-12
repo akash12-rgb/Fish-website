@@ -10,7 +10,7 @@ define('DB_PASSWORD', 'npg_6ZvAOxSK7UGr');
 
 // App settings
 define('APP_NAME',    'Sunbis AgroFish');
-define('APP_URL',     getenv('APP_URL') ?: 'http://localhost/sunbis-new');
+define('APP_URL',     getenv('APP_URL') ?: 'https://fish-website.onrender.com/');
 define('UPLOAD_DIR',  __DIR__ . '/../public/uploads/products/');
 define('UPLOAD_URL',  APP_URL . '/public/uploads/products/');
 
