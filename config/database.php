@@ -12,7 +12,7 @@ define('DB_PASSWORD', 'npg_6ZvAOxSK7UGr');
 define('APP_NAME',    'Sunbis AgroFish');
 define('APP_URL',     getenv('APP_URL') ?: 'https://fish-website.onrender.com');
 define('UPLOAD_DIR', __DIR__ . '/../public/uploads/products/');
-define('UPLOAD_URL', APP_URL . '/uploads/products/');
+define('UPLOAD_URL', APP_URL . '/public/uploads/products/');
 
 // Session start (called once)
 if (session_status() === PHP_SESSION_NONE) {
