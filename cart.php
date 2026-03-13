@@ -92,9 +92,11 @@ $total    = $subtotal + $shipping;
         <?php foreach ($items as $item): ?>
           <div class="cart-item" id="cart-item-<?= $item['cart_id'] ?>">
             <div class="cart-item-img">
-              <?php if ($item['image'] && file_exists(UPLOAD_DIR . $item['image'])): ?>
-                <img src="<?= UPLOAD_URL . htmlspecialchars($item['image']) ?>" style="width:100%;height:100%;object-fit:cover;border-radius:10px" alt="" />
-                <?php else: ?>🐟<?php endif; ?>
+              <?php if (!empty($item['image'])): ?>
+  <img src="data:image/jpeg;base64,<?= base64_encode($item['image']) ?>" 
+       style="width:100%;height:100%;object-fit:cover;border-radius:10px" 
+       alt="" />
+<?php else: ?>🐟<?php endif; ?>
             </div>
             <div class="flex-grow-1">
               <div class="fw-bold"><?= htmlspecialchars($item['product_name']) ?></div>
