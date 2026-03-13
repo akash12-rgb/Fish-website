@@ -83,11 +83,13 @@ $featured = $db->query("
       <?php foreach ($featured as $p): ?>
         <div class="col-6 col-md-4 col-lg-3">
           <div class="product-card">
-            <?php if ($p['image'] && file_exists(UPLOAD_DIR . $p['image'])): ?>
-              <img src="<?= UPLOAD_URL . htmlspecialchars($p['image']) ?>" class="card-img-top" alt="<?= htmlspecialchars($p['product_name']) ?>" />
-            <?php else: ?>
-              <div class="product-img-placeholder">🐟</div>
-            <?php endif; ?>
+           <?php if (!empty($p['image'])): ?>
+  <img src="data:image/jpeg;base64,<?= base64_encode($p['image']) ?>" 
+       class="card-img-top" 
+       alt="<?= htmlspecialchars($p['product_name']) ?>" />
+<?php else: ?>
+  <div class="product-img-placeholder">🐟</div>
+<?php endif; ?>
             <div class="card-body">
               <span class="badge-category mb-2 d-inline-block"><?= htmlspecialchars($p['category_name'] ?? '') ?></span>
               <h6 class="card-title"><?= htmlspecialchars($p['product_name']) ?></h6>
