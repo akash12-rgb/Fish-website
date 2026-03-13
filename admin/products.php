@@ -51,28 +51,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
   } else {
-    $imageData = $_POST['existing_image'] ?? null;
+
+    if ($id) {
+      $st = $db->prepare("SELECT image FROM products WHERE id=?");
+      $st->execute([$id]);
+      $imageData = $st->fetchColumn();
+    }
+
   }
 
   if (!$error) {
 
     if ($id) {
 
-      $db->prepare("
+      $stmt = $db->prepare("
         UPDATE products 
         SET product_name=?,slug=?,description=?,price=?,stock_quantity=?,category_id=?,image=?,is_featured=? 
         WHERE id=?
-      ")->execute([$name,$slug,$description,$price,$stock,$catId,$imageData,$featured,$id]);
+      ");
+
+      $stmt->bindParam(1,$name);
+      $stmt->bindParam(2,$slug);
+      $stmt->bindParam(3,$description);
+      $stmt->bindParam(4,$price);
+      $stmt->bindParam(5,$stock);
+      $stmt->bindParam(6,$catId);
+      $stmt->bindParam(7,$imageData,PDO::PARAM_LOB);
+      $stmt->bindParam(8,$featured);
+      $stmt->bindParam(9,$id);
+
+      $stmt->execute();
 
       $success = 'Product updated.';
 
     } else {
 
-      $db->prepare("
+      $stmt = $db->prepare("
         INSERT INTO products 
         (product_name,slug,description,price,stock_quantity,category_id,image,is_featured) 
         VALUES (?,?,?,?,?,?,?,?)
-      ")->execute([$name,$slug,$description,$price,$stock,$catId,$imageData,$featured]);
+      ");
+
+      $stmt->bindParam(1,$name);
+      $stmt->bindParam(2,$slug);
+      $stmt->bindParam(3,$description);
+      $stmt->bindParam(4,$price);
+      $stmt->bindParam(5,$stock);
+      $stmt->bindParam(6,$catId);
+      $stmt->bindParam(7,$imageData,PDO::PARAM_LOB);
+      $stmt->bindParam(8,$featured);
+
+      $stmt->execute();
 
       $success = 'Product added.';
     }
@@ -173,7 +202,6 @@ href="<?= APP_URL ?>/admin/<?= $href ?>">
 <form method="POST" enctype="multipart/form-data">
 
 <input type="hidden" name="id" value="<?= $editing['id'] ?? '' ?>">
-<input type="hidden" name="existing_image" value="<?= $editing['image'] ?? '' ?>">
 
 <div class="mb-3">
 
