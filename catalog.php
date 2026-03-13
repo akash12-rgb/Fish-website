@@ -97,15 +97,17 @@ $products = $st->fetchAll();
           <?php foreach ($products as $p): ?>
             <div class="col-6 col-md-4">
               <div class="product-card">
-                <?php if ($p['image'] && file_exists(UPLOAD_DIR . $p['image'])): ?>
-                  <a href="product.php?id=<?= $p['id'] ?>">
-                    <img src="<?= UPLOAD_URL . htmlspecialchars($p['image']) ?>" class="card-img-top" alt="<?= htmlspecialchars($p['product_name']) ?>" />
-                  </a>
-                <?php else: ?>
-                  <a href="product.php?id=<?= $p['id'] ?>">
-                    <div class="product-img-placeholder">🐟</div>
-                  </a>
-                <?php endif; ?>
+              <?php if (!empty($p['image'])): ?>
+  <a href="product.php?id=<?= $p['id'] ?>">
+    <img src="data:image/jpeg;base64,<?= base64_encode($p['image']) ?>"
+         class="card-img-top"
+         alt="<?= htmlspecialchars($p['product_name']) ?>" />
+  </a>
+<?php else: ?>
+  <a href="product.php?id=<?= $p['id'] ?>">
+    <div class="product-img-placeholder">🐟</div>
+  </a>
+<?php endif; ?>
                 <div class="card-body">
                   <span class="badge-category mb-1 d-inline-block"><?= htmlspecialchars($p['category_name'] ?? '') ?></span>
                   <h6 class="card-title">
