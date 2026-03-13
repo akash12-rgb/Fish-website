@@ -97,16 +97,30 @@ $products = $st->fetchAll();
           <?php foreach ($products as $p): ?>
             <div class="col-6 col-md-4">
               <div class="product-card">
-              <?php if (!empty($p['image'])): ?>
-  <a href="product.php?id=<?= $p['id'] ?>">
-    <img src="data:image/jpeg;base64,<?= base64_encode($p['image']) ?>"
-         class="card-img-top"
-         alt="<?= htmlspecialchars($p['product_name']) ?>" />
-  </a>
+             <?php if (!empty($p['image'])): ?>
+
+<?php
+$img = $p['image'];
+
+if (is_resource($img)) {
+    $img = stream_get_contents($img);
+} elseif (is_string($img) && substr($img,0,2) === '\\x') {
+    $img = hex2bin(substr($img,2));
+}
+?>
+
+<a href="product.php?id=<?= $p['id'] ?>">
+  <img src="data:image/jpeg;base64,<?= base64_encode($img) ?>"
+       class="card-img-top"
+       alt="<?= htmlspecialchars($p['product_name']) ?>" />
+</a>
+
 <?php else: ?>
-  <a href="product.php?id=<?= $p['id'] ?>">
-    <div class="product-img-placeholder">🐟</div>
-  </a>
+
+<a href="product.php?id=<?= $p['id'] ?>">
+  <div class="product-img-placeholder">🐟</div>
+</a>
+
 <?php endif; ?>
                 <div class="card-body">
                   <span class="badge-category mb-1 d-inline-block"><?= htmlspecialchars($p['category_name'] ?? '') ?></span>
