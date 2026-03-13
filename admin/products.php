@@ -271,7 +271,7 @@ value="<?= $editing['stock_quantity'] ?? '' ?>">
 
 <?php if (!empty($editing['image'])): ?>
 
-<img src="data:image/jpeg;base64,<?= base64_encode($editing['image']) ?>"
+<img src="data:image/jpeg;base64,<?= base64_encode(hex2bin(substr($editing['image'],2))) ?>"
 style="width:100%;border-radius:10px;margin-bottom:.5rem">
 
 <?php endif; ?>
@@ -347,7 +347,7 @@ style="width:100%;border-radius:10px;margin-bottom:.5rem">
 
 <?php if (!empty($p['image'])): ?>
 
-<img src="data:image/jpeg;base64,<?= base64_encode($p['image']) ?>"
+<img src="data:image/jpeg;base64,<?= base64_encode(hex2bin(substr($p['image'],2))) ?>"
 style="width:50px;height:50px;object-fit:cover;border-radius:8px">
 
 <?php else: ?>
