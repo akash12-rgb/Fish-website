@@ -83,12 +83,26 @@ $featured = $db->query("
       <?php foreach ($featured as $p): ?>
         <div class="col-6 col-md-4 col-lg-3">
           <div class="product-card">
-           <?php if (!empty($p['image'])): ?>
-  <img src="data:image/jpeg;base64,<?= base64_encode($p['image']) ?>" 
-       class="card-img-top" 
-       alt="<?= htmlspecialchars($p['product_name']) ?>" />
+          <?php if (!empty($p['image'])): ?>
+
+<?php
+$img = $p['image'];
+
+if (is_resource($img)) {
+    $img = stream_get_contents($img);
+} elseif (is_string($img) && substr($img,0,2) === '\\x') {
+    $img = hex2bin(substr($img,2));
+}
+?>
+
+<img src="data:image/jpeg;base64,<?= base64_encode($img) ?>"
+     class="card-img-top"
+     alt="<?= htmlspecialchars($p['product_name']) ?>" />
+
 <?php else: ?>
-  <div class="product-img-placeholder">🐟</div>
+
+<div class="product-img-placeholder">🐟</div>
+
 <?php endif; ?>
             <div class="card-body">
               <span class="badge-category mb-2 d-inline-block"><?= htmlspecialchars($p['category_name'] ?? '') ?></span>
