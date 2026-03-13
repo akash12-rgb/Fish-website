@@ -271,7 +271,13 @@ value="<?= $editing['stock_quantity'] ?? '' ?>">
 
 <?php if (!empty($editing['image'])): ?>
 
-<img src="data:image/jpeg;base64,<?= base64_encode(hex2bin(substr($editing['image'],2))) ?>"
+<?php
+$img = $editing['image'];
+if (is_string($img) && str_starts_with($img,'\\x')) {
+    $img = hex2bin(substr($img,2));
+}
+?>
+<img src="data:image/jpeg;base64,<?= base64_encode($img) ?>"
 style="width:100%;border-radius:10px;margin-bottom:.5rem">
 
 <?php endif; ?>
@@ -338,19 +344,6 @@ style="width:100%;border-radius:10px;margin-bottom:.5rem">
 </thead>
 
 <tbody>
-  <?php
-echo "<pre>";
-echo "TYPE: " . gettype($p['image']) . "\n";
-
-if (is_string($p['image'])) {
-    echo "FIRST 20 CHARS: " . substr($p['image'],0,20) . "\n";
-    echo "STARTS WITH HEX PREFIX: " . (str_starts_with($p['image'],'\\x') ? 'YES' : 'NO') . "\n";
-    echo "LENGTH: " . strlen($p['image']) . "\n";
-} else {
-    var_dump($p['image']);
-}
-echo "</pre>";
-?>
 
 <?php foreach ($products as $p): ?>
 
@@ -360,7 +353,13 @@ echo "</pre>";
 
 <?php if (!empty($p['image'])): ?>
 
-<img src="data:image/jpeg;base64,<?= base64_encode(hex2bin(substr($p['image'],2))) ?>"
+<?php
+$img = $p['image'];
+if (is_string($img) && str_starts_with($img,'\\x')) {
+    $img = hex2bin(substr($img,2));
+}
+?>
+<img src="data:image/jpeg;base64,<?= base64_encode($img) ?>"
 style="width:50px;height:50px;object-fit:cover;border-radius:8px">
 
 <?php else: ?>
