@@ -38,7 +38,7 @@ $related = $related->fetchAll();
     <!-- IMAGE -->
     <div class="col-lg-5">
       <?php if (!empty($p['image'])): ?>
-        <img src="<?= UPLOAD_URL . htmlspecialchars($p['image']) ?>" class="product-detail-img w-100" alt="<?= htmlspecialchars($p['product_name']) ?>" />
+        <img src="data:image/jpeg;base64,<?= base64_encode($p['image']) ?>" class="product-detail-img w-100" alt="<?= htmlspecialchars($p['product_name']) ?>" />
       <?php else: ?>
         <div class="product-detail-placeholder">🐟</div>
       <?php endif; ?>
@@ -104,7 +104,7 @@ $related = $related->fetchAll();
             <div class="product-card">
               <a href="product.php?id=<?= $r['id'] ?>">
                 <?php if (!empty($r['image'])): ?>
-                  <img src="<?= UPLOAD_URL . htmlspecialchars($r['image']) ?>" class="w-100">
+                  <img src="data:image/jpeg;base64,<?= base64_encode($r['image']) ?>" style="height:180px;width:100%;object-fit:cover;border-radius:10px;">
                 <?php else: ?>
                   <div class="product-img-placeholder">🐟</div>
                 <?php endif; ?>
