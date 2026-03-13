@@ -338,6 +338,19 @@ style="width:100%;border-radius:10px;margin-bottom:.5rem">
 </thead>
 
 <tbody>
+  <?php
+echo "<pre>";
+echo "TYPE: " . gettype($p['image']) . "\n";
+
+if (is_string($p['image'])) {
+    echo "FIRST 20 CHARS: " . substr($p['image'],0,20) . "\n";
+    echo "STARTS WITH HEX PREFIX: " . (str_starts_with($p['image'],'\\x') ? 'YES' : 'NO') . "\n";
+    echo "LENGTH: " . strlen($p['image']) . "\n";
+} else {
+    var_dump($p['image']);
+}
+echo "</pre>";
+?>
 
 <?php foreach ($products as $p): ?>
 
