@@ -70,7 +70,6 @@ function requireLogin(): void
 function requireAdmin(): void
 {
     $u = currentUser();
-    echo $u;
     if (!$u || $u['role'] !== 'admin') {
         header('Location: ' . APP_URL . '/index.php');
         exit;
