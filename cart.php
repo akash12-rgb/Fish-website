@@ -144,7 +144,7 @@ if (is_resource($img)) {
             <span><?= $shipping == 0 ? '<span class="text-success fw-bold">FREE</span>' : 'Rs ' . number_format($shipping, 0, ',', '.') ?></span>
           </div>
           <?php if ($shipping > 0): ?>
-            <small class="text-muted">Free shipping for orders above Rs 200,000</small>
+            <small class="text-muted">Free shipping for orders above Rs 2,000</small>
           <?php endif; ?>
           <div class="order-total mt-2">
             <span>Total</span><span>Rs <?= number_format($total, 0, ',', '.') ?></span>
