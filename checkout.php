@@ -10,48 +10,70 @@ $buyQty   = max(1, (int)($_GET['qty'] ?? 1));
 
 if ($buyNowId) {
 
-    $st = $db->prepare('SELECT * FROM products WHERE id=? AND stock_quantity >= ?');
-    $st->execute([$buyNowId, $buyQty]);
-    $product = $st->fetch();
+  $st = $db->prepare('SELECT * FROM products WHERE id=? AND stock_quantity >= ?');
+  $st->execute([$buyNowId, $buyQty]);
+  $product = $st->fetch();
 
-    if (!$product) {
-        header('Location: catalog.php');
-        exit;
-    }
+  if (!$product) {
+    header('Location: catalog.php');
+    exit;
+  }
 
-    $items = [[
-        'cart_id' => 0,
-        'product_id' => $product['id'],
-        'product_name' => $product['product_name'],
-        'price' => $product['price'],
-        'quantity' => $buyQty,
-        'image' => $product['image'],
-        'stock_quantity' => $product['stock_quantity'],
-    ]];
+  $items = [[
+    'cart_id' => 0,
+    'product_id' => $product['id'],
+    'product_name' => $product['product_name'],
+    'price' => $product['price'],
+    'quantity' => $buyQty,
+    'image' => $product['image'],
+    'stock_quantity' => $product['stock_quantity'],
+  ]];
 
 } else {
 
-    $st = $db->prepare('
-        SELECT c.id as cart_id, c.quantity, p.id as product_id,
-               p.product_name, p.price, p.image, p.stock_quantity
+  $st = $db->prepare('
+        SELECT c.id as cart_id, c.quantity, p.id as product_id, p.product_name,
+               p.price, p.image, p.stock_quantity
         FROM cart c
         JOIN products p ON p.id = c.product_id
         WHERE c.user_id = ?
     ');
-    $st->execute([$user['id']]);
-    $items = $st->fetchAll();
+  $st->execute([$user['id']]);
+  $items = $st->fetchAll();
 
-    if (!$items) {
-        header('Location: cart.php');
-        exit;
-    }
+  if (!$items) {
+    header('Location: cart.php');
+    exit;
+  }
 }
 
-$subtotal = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $items));
-$shipping = $subtotal >= 200000 ? 0 : 15000;
-$total    = $subtotal + $shipping;
+
+/* SAFE TOTAL CALCULATION */
+
+$subtotal = 0;
+
+foreach ($items as $item) {
+
+  $price = (float)$item['price'];
+  $qty   = (int)$item['quantity'];
+
+  if ($price < 0) $price = 0;
+  if ($qty < 1) $qty = 1;
+
+  $subtotal += ($price * $qty);
+}
+
+if ($subtotal >= 2000) {
+  $shipping = 0;
+} else {
+  $shipping = 50;
+}
+
+$total = $subtotal + $shipping;
+
 
 $pageTitle = 'Checkout – Sunbis AgroFish';
+
 require_once __DIR__ . '/includes/header.php';
 ?>
 
@@ -177,7 +199,7 @@ style="color:var(--primary);font-size:1.4rem"></i>
 </div>
 
 <div class="small fw-bold">
-Rs <?= number_format($item['price'] * $item['quantity'], 0, ',', '.') ?>
+Rs <?= number_format($item['price'] * $item['quantity'], 2) ?>
 </div>
 
 </div>
@@ -187,7 +209,7 @@ Rs <?= number_format($item['price'] * $item['quantity'], 0, ',', '.') ?>
 
 <div class="order-line mt-2">
 <span>Subtotal</span>
-<span>Rs <?= number_format($subtotal, 0, ',', '.') ?></span>
+<span>Rs <?= number_format($subtotal, 2) ?></span>
 </div>
 
 <div class="order-line">
@@ -197,7 +219,7 @@ Rs <?= number_format($item['price'] * $item['quantity'], 0, ',', '.') ?>
 <span>
 <?= $shipping == 0
 ? '<span class="text-success fw-bold">FREE</span>'
-: 'Rs ' . number_format($shipping, 0, ',', '.') ?>
+: 'Rs ' . number_format($shipping, 2) ?>
 </span>
 
 </div>
@@ -207,7 +229,7 @@ Rs <?= number_format($item['price'] * $item['quantity'], 0, ',', '.') ?>
 <span>Total</span>
 
 <span style="color:var(--primary)">
-Rs <?= number_format($total, 0, ',', '.') ?>
+Rs <?= number_format($total, 2) ?>
 </span>
 
 </div>
