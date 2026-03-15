@@ -1,4 +1,5 @@
 <?php
+// payments/payment_request.php
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/payment.php';
 requireLogin();
@@ -9,63 +10,45 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 if (!verifyCsrf($_POST['csrf'] ?? '')) {
-    die('Invalid CSRF token');
+    die('Invalid CSRF token.');
 }
 
 $db   = getDB();
 $user = currentUser();
 
-/* -----------------------------
-   CHECK IF BUY NOW MODE
-------------------------------*/
+/* ── Collect cart / buy-now items ───────────────────────── */
 
 $buyNowId  = (int)($_POST['buy_now_id'] ?? 0);
 $buyNowQty = max(1, (int)($_POST['buy_now_qty'] ?? 1));
 
-$orderItems = [];
+if ($buyNowId) {
 
-if ($buyNowId > 0) {
-
-    /* BUY NOW FLOW */
-
-    $st = $db->prepare("
-        SELECT id, product_name, price, stock_quantity
-        FROM products
-        WHERE id = ? AND stock_quantity >= ?
-    ");
-
+    $st = $db->prepare('SELECT * FROM products WHERE id=? AND stock_quantity >= ?');
     $st->execute([$buyNowId, $buyNowQty]);
-    $product = $st->fetch(PDO::FETCH_ASSOC);
+    $product = $st->fetch();
 
     if (!$product) {
-        header('Location: ' . APP_URL . '/catalog.php');
-        exit;
+        die('Product unavailable.');
     }
 
-    $orderItems[] = [
+    $orderItems = [[
         'product_id'   => $product['id'],
         'product_name' => $product['product_name'],
-        'price'        => (float)$product['price'],
+        'price'        => $product['price'],
         'quantity'     => $buyNowQty
-    ];
+    ]];
 
 } else {
 
-    /* CART FLOW */
-
-    $st = $db->prepare("
-        SELECT c.quantity,
-               p.id AS product_id,
-               p.product_name,
-               p.price,
-               p.stock_quantity
+    $st = $db->prepare('
+        SELECT c.quantity, p.id as product_id, p.product_name, p.price, p.stock_quantity
         FROM cart c
         JOIN products p ON p.id = c.product_id
         WHERE c.user_id = ?
-    ");
+    ');
 
     $st->execute([$user['id']]);
-    $orderItems = $st->fetchAll(PDO::FETCH_ASSOC);
+    $orderItems = $st->fetchAll();
 
     if (!$orderItems) {
         header('Location: ' . APP_URL . '/cart.php');
@@ -73,37 +56,42 @@ if ($buyNowId > 0) {
     }
 }
 
-/* -----------------------------
-   CALCULATE TOTAL
-------------------------------*/
+/* ── Calculate totals ───────────────────────────────────── */
 
-$subtotal = 0;
-
-foreach ($orderItems as $item) {
-    $subtotal += $item['price'] * $item['quantity'];
-}
+$subtotal = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $orderItems));
 
 $shipping = ($subtotal >= 2000) ? 0 : 50;
-$total    = $subtotal + $shipping;
 
-/* -----------------------------
-   CREATE ORDER
-------------------------------*/
+$total = $subtotal + $shipping;
 
-$transactionId = 'ORD-' . time() . '-' . rand(1000,9999);
+/* ── Transaction ID ─────────────────────────────────────── */
 
-$db->beginTransaction();
+$transactionId = 'SAF-' . strtoupper(bin2hex(random_bytes(6))) . '-' . time();
+
+/* ── Shipping data ─────────────────────────────────────── */
+
+$shippingName    = trim($_POST['shipping_name']    ?? $user['name']);
+$shippingPhone   = trim($_POST['shipping_phone']   ?? '');
+$shippingAddress = trim($_POST['shipping_address'] ?? '');
+$shippingCity    = trim($_POST['shipping_city']    ?? '');
+$shippingZip     = trim($_POST['shipping_zip']     ?? '');
+$notes           = trim($_POST['notes']            ?? '');
+$customerEmail   = trim($_POST['customer_email']   ?? $user['email']);
 
 try {
 
-    $st = $db->prepare("
+    $db->beginTransaction();
+
+    /* Create order */
+
+    $st = $db->prepare('
         INSERT INTO orders
         (user_id,total_amount,payment_status,order_status,transaction_id,
          shipping_name,shipping_phone,shipping_address,shipping_city,
          shipping_zip,notes)
         VALUES (?,?,?,?,?,?,?,?,?,?,?)
         RETURNING id
-    ");
+    ');
 
     $st->execute([
         $user['id'],
@@ -111,45 +99,62 @@ try {
         'pending',
         'pending',
         $transactionId,
-        $_POST['shipping_name'],
-        $_POST['shipping_phone'],
-        $_POST['shipping_address'],
-        $_POST['shipping_city'],
-        $_POST['shipping_zip'],
-        $_POST['notes']
+        $shippingName,
+        $shippingPhone,
+        $shippingAddress,
+        $shippingCity,
+        $shippingZip,
+        $notes
     ]);
 
     $orderId = $st->fetchColumn();
 
-    /* ORDER ITEMS */
+    /* Order items */
 
-    $itemInsert = $db->prepare("
-        INSERT INTO order_items
-        (order_id,product_id,quantity,price)
+    $itemSt = $db->prepare('
+        INSERT INTO order_items (order_id,product_id,quantity,price)
         VALUES (?,?,?,?)
-    ");
+    ');
+
+    $stockSt = $db->prepare('
+        UPDATE products
+        SET stock_quantity = stock_quantity - ?
+        WHERE id=?
+    ');
 
     foreach ($orderItems as $item) {
 
-        $itemInsert->execute([
+        $itemSt->execute([
             $orderId,
             $item['product_id'],
             $item['quantity'],
             $item['price']
         ]);
 
-        $db->prepare("
-            UPDATE products
-            SET stock_quantity = stock_quantity - ?
-            WHERE id = ?
-        ")->execute([$item['quantity'], $item['product_id']]);
+        $stockSt->execute([
+            $item['quantity'],
+            $item['product_id']
+        ]);
     }
 
-    /* CLEAR CART ONLY IF CART CHECKOUT */
+    /* Payment record */
+
+    $st = $db->prepare('
+        INSERT INTO payments
+        (order_id,payment_gateway,transaction_id,amount,payment_status)
+        VALUES (?,?,?,?,?)
+    ');
+
+    $st->execute([
+        $orderId,
+        'ICICI_OrangePay',
+        $transactionId,
+        $total,
+        'pending'
+    ]);
 
     if (!$buyNowId) {
-        $db->prepare("DELETE FROM cart WHERE user_id=?")
-           ->execute([$user['id']]);
+        $db->prepare('DELETE FROM cart WHERE user_id=?')->execute([$user['id']]);
     }
 
     $db->commit();
@@ -157,51 +162,54 @@ try {
 } catch (Exception $e) {
 
     $db->rollBack();
-    die("Order failed");
+    error_log('Order creation failed: ' . $e->getMessage());
+    header('Location: ' . APP_URL . '/checkout.php?error=order_failed');
+    exit;
 }
 
-/* -----------------------------
-   PAYMENT REDIRECT
-------------------------------*/
+/* ── Checksum ───────────────────────────────────────────── */
 
-$checksumString = ORANGEPAY_MERCHANT_ID . "|" .
-                  $orderId . "|" .
-                  number_format($total,2,'.','') . "|" .
-                  ORANGEPAY_MERCHANT_KEY;
+$checksumString = implode('|', [
+    ORANGEPAY_MERCHANT_ID,
+    $orderId,
+    number_format($total,2,'.',''),
+    ORANGEPAY_CURRENCY,
+    ORANGEPAY_MERCHANT_KEY
+]);
 
 $checksum = hash('sha256',$checksumString);
 
+/* ── Payment payload ────────────────────────────────────── */
+
 $params = [
-    "merchant_id" => ORANGEPAY_MERCHANT_ID,
-    "order_id" => $orderId,
-    "transaction_id" => $transactionId,
-    "amount" => number_format($total,2,'.',''),
-    "currency" => "INR",
-    "customer_name" => $_POST['shipping_name'],
-    "customer_email" => $_POST['customer_email'],
-    "customer_phone" => $_POST['shipping_phone'],
-    "return_url" => ORANGEPAY_RETURN_URL,
-    "cancel_url" => ORANGEPAY_CANCEL_URL,
-    "checksum" => $checksum
+    'merchant_id'    => ORANGEPAY_MERCHANT_ID,
+    'order_id'       => $orderId,
+    'transaction_id' => $transactionId,
+    'amount'         => number_format($total,2,'.',''),
+    'currency'       => ORANGEPAY_CURRENCY,
+    'customer_name'  => $shippingName,
+    'customer_email' => $customerEmail,
+    'customer_phone' => $shippingPhone,
+    'return_url'     => ORANGEPAY_RETURN_URL,
+    'cancel_url'     => ORANGEPAY_CANCEL_URL,
+    'checksum'       => $checksum,
+    'description'    => 'Sunbis AgroFish Order #' . $orderId
 ];
-
 ?>
-
+<!DOCTYPE html>
 <html>
 <body>
 
-<form id="payform" method="POST" action="<?= ORANGEPAY_BASE_URL ?>">
+<form id="payment-form" method="POST" action="<?= htmlspecialchars(ORANGEPAY_BASE_URL) ?>">
 
-<?php foreach($params as $k=>$v): ?>
-
-<input type="hidden" name="<?= $k ?>" value="<?= htmlspecialchars($v) ?>">
-
+<?php foreach ($params as $key => $val): ?>
+<input type="hidden" name="<?= htmlspecialchars($key) ?>" value="<?= htmlspecialchars($val) ?>">
 <?php endforeach; ?>
 
 </form>
 
 <script>
-document.getElementById('payform').submit();
+document.getElementById('payment-form').submit();
 </script>
 
 </body>
