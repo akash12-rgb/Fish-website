@@ -141,7 +141,7 @@ style="background:var(--accent);color:var(--deep);font-weight:600;border-radius:
 
 <?php foreach ([
 
-['🚚','Free delivery on orders above Rs 200k'],
+['🚚','Free delivery on orders above Rs 2000'],
 ['🔒','Secure ICICI Orange Pay'],
 ['✅','100% Fresh Guaranteed']
 
