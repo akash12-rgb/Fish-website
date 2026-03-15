@@ -69,9 +69,19 @@ $total = $subtotal + $shipping;
   <h2 class="section-title mb-4">Checkout</h2>
 
   <form action="payments/payment_request.php" method="POST" id="checkout-form">
-    <input type="hidden" name="buy_now_id" value="<?= $buyNowId ?>" />
-    <input type="hidden" name="buy_now_qty" value="<?= $buyQty ?>" />
-    <input type="hidden" name="csrf" value="<?= csrfToken() ?>" />
+ <input type="hidden" name="buy_now_id" value="<?= $buyNowId ?>" />
+<input type="hidden" name="buy_now_qty" value="<?= $buyQty ?>" />
+<input type="hidden" name="subtotal" value="<?= $subtotal ?>" />
+<input type="hidden" name="shipping" value="<?= $shipping ?>" />
+<input type="hidden" name="total" value="<?= $total ?>" />
+<input type="hidden" name="csrf" value="<?= csrfToken() ?>" />
+
+    <?php if ($buyNowId): ?>
+<input type="hidden" name="product_id" value="<?= $items[0]['product_id'] ?>">
+<input type="hidden" name="product_name" value="<?= htmlspecialchars($items[0]['product_name']) ?>">
+<input type="hidden" name="price" value="<?= $items[0]['price'] ?>">
+<input type="hidden" name="quantity" value="<?= $items[0]['quantity'] ?>">
+<?php endif; ?>
 
     <div class="row g-4">
 
