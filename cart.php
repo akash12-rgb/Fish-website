@@ -92,11 +92,27 @@ $total    = $subtotal + $shipping;
         <?php foreach ($items as $item): ?>
           <div class="cart-item" id="cart-item-<?= $item['cart_id'] ?>">
             <div class="cart-item-img">
-              <?php if (!empty($item['image'])): ?>
-  <img src="data:image/jpeg;base64,<?= base64_encode($item['image']) ?>" 
-       style="width:100%;height:100%;object-fit:cover;border-radius:10px" 
-       alt="" />
-<?php else: ?>🐟<?php endif; ?>
+             <?php if (!empty($item['image'])): ?>
+
+<?php
+$img = $item['image'];
+
+if (is_resource($img)) {
+    $img = stream_get_contents($img);
+} elseif (is_string($img) && substr($img, 0, 2) === '\\x') {
+    $img = hex2bin(substr($img, 2));
+}
+?>
+
+<img src="data:image/jpeg;base64,<?= base64_encode($img) ?>"
+     style="width:100%;height:100%;object-fit:cover;border-radius:10px"
+     alt="<?= htmlspecialchars($item['product_name']) ?>" />
+
+<?php else: ?>
+
+🐟
+
+<?php endif; ?>
             </div>
             <div class="flex-grow-1">
               <div class="fw-bold"><?= htmlspecialchars($item['product_name']) ?></div>
