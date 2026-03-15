@@ -46,7 +46,7 @@ $cats = $db->query('SELECT * FROM categories ORDER BY category_name')->fetchAll(
           <a href="<?= APP_URL ?>/logout.php" class="btn btn-sm btn-outline-light">Logout</a>
         <?php else: ?>
           <a href="<?= APP_URL ?>/login.php" class="btn btn-sm btn-outline-light me-1">Login</a>
-          <a href="<?= APP_URL ?>/register.php" class="btn btn-sm btn-light">Register</a>
+          <a href="<?= APP_URL ?>/register.php" class="btn btn-sm btn-primary">Register</a>
         <?php endif; ?>
       </div>
     </div>
