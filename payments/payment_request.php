@@ -86,9 +86,9 @@ try {
 
     $st = $db->prepare('
         INSERT INTO orders
-        (user_id,total_amount,payment_status,order_status,transaction_id,
+        (user_id,total_amount,order_status,transaction_id,
          shipping_name,shipping_phone,shipping_address,shipping_city,
-         shipping_zip,notes)
+         shipping_zip,notes,payment_status)
         VALUES (?,?,?,?,?,?,?,?,?,?,?)
         RETURNING id
     ');
@@ -97,14 +97,14 @@ try {
         $user['id'],
         $total,
         'pending',
-        'pending',
         $transactionId,
         $shippingName,
         $shippingPhone,
         $shippingAddress,
         $shippingCity,
         $shippingZip,
-        $notes
+        $notes,
+        'pending'              
     ]);
 
     $orderId = $st->fetchColumn();
