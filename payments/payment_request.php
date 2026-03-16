@@ -139,19 +139,27 @@ try {
 
     /* Payment record */
 
-    $st = $db->prepare('
-        INSERT INTO payments
-        (order_id,payment_gateway,transaction_id,amount,payment_status)
-        VALUES (?,?,?,?,?)
-    ');
+   $st = $db->prepare('
+INSERT INTO payments
+(
+    order_id,
+    amount,
+    payment_gateway,
+    transaction_id,
+    payment_status,
+    gateway_response
+)
+VALUES (?,?,?,?,?,?)
+');
 
-    $st->execute([
-        $orderId,
-        'ICICI_OrangePay',
-        $transactionId,
-        $total,
-        'pending'
-    ]);
+$st->execute([
+    $orderId,
+    $total,
+    'ICICI_OrangePay',
+    $transactionId,
+    'pending',
+    NULL
+]);
 
     if (!$buyNowId) {
         $db->prepare('DELETE FROM cart WHERE user_id=?')->execute([$user['id']]);
