@@ -28,7 +28,8 @@
           <li><a href="<?= APP_URL ?>/index.php#about">About Us</a></li>
           <li><a href="<?= APP_URL ?>/contact.php">Contact</a></li>
        <li><a href="<?= APP_URL ?>/privacy-policy.php">Privacy Policy</a></li>
-<li><a href="<?= APP_URL ?>/terms-of-service.php">Terms of Service</a></li>
+        <li><a href="<?= APP_URL ?>/terms-of-service.php">Terms of Service</a></li>
+          <li><a href="<?= APP_URL ?>/refund-policy.php">Refund Policy</a></li>
         </ul>
       </div>
       <div class="col-lg-4">
